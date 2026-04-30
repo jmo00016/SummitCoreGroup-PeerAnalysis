@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summit Core Group – Peer Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #fff; margin: 0; padding: 0; }
+.db-wrap { background:#fff; font-family:'DM Sans',sans-serif; color:#1a2744; }
+.db-header { background:#1a2744; padding:18px 24px 16px; }
+.db-title { font-family:'DM Serif Display',serif; font-size:1.35rem; color:#fff; font-weight:400; }
+.db-meta { color:#94a8d0; font-size:0.7rem; margin-top:5px; }
+.db-meta span { color:#94a8d0; font-weight:400; }
+.db-content { padding:0; }
+.metric-section { padding:22px 24px 18px; border-bottom:1px solid #e0e3ee; }
+.metric-section:last-child { border-bottom:none; }
+.metric-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:4px; }
+.metric-title { font-family:'DM Serif Display',serif; font-size:1.4rem; color:#1a3a6b; letter-spacing:0.5px; line-height:1.1; text-transform:uppercase; flex:1; }
+.metric-sub { color:#2a5cb8; font-size:0.74rem; font-style:italic; line-height:1.45; margin-bottom:14px; }
+table { width:100%; border-collapse:collapse; font-size:0.79rem; }
+thead th { text-align:left; font-size:0.67rem; font-weight:600; color:#6b7a99; border-bottom:1px solid #c0c4d4; padding:5px 10px 7px; }
+thead th:last-child { text-align:right; }
+tbody td { padding:7px 10px; border-bottom:1px solid #eef0f6; color:#1a2744; }
+tbody td:last-child { text-align:right; font-variant-numeric:tabular-nums; font-weight:500; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:nth-child(even) { background:#f7f8fc; }
+tbody tr:nth-child(odd)  { background:#fff; }
+tr.summit-row { background:#fff8f4 !important; }
+tr.summit-row td { font-weight:700; color:#c05a1a; }
+.tbl-avg { display:flex; justify-content:space-between; padding:5px 10px; background:#eef0f8; border-radius:0 0 4px 4px; font-size:0.79rem; font-weight:600; color:#4a5a7a; margin-top:1px; }
+</style>
+</head>
+<body>
+<div class="db-wrap">
+  <div class="db-header">
+    <div class="db-title">Summit Core Group — Peer Analysis</div>
+    <div class="db-meta">As of <span>December 31, 2025</span></div>
+  </div>
+  <div class="db-content" id="content"></div>
+</div>
+<script>
+var SUMMIT = 'Summit Core Group';
+var ALL_COMPANIES = [
+  'Alderton Industrial','Cascadia Manufacturing Group','Delverton & Sons',
+  'Farwick Corp.','Halloran Systems','Mirex Technologies',
+  'Northgate Supplies','Summit Core Group','Westbrook Fabrication'
+];
+var METRICS = [
+  { id:'est-loss', title:'Estimated Loss Rate',
+    sub:'Percentage of money owed by customers as of December 31, 2025 management estimates will never be paid',
+    fmt:function(v){return v.toFixed(2)+'%';}, avg:3.45, avgLabel:'Peer Average: 3.45%',
+    col:'Estimated Loss Rate as of 12/31/2025',
+    data:{'Alderton Industrial':2.90,'Cascadia Manufacturing Group':3.80,'Delverton & Sons':4.30,'Farwick Corp.':3.10,'Halloran Systems':3.60,'Mirex Technologies':2.60,'Northgate Supplies':4.10,'Summit Core Group':3.50,'Westbrook Fabrication':3.20}
+  },
+  { id:'revenue', title:'Peer Group by Revenue',
+    sub:'Annual revenue (in millions) across peer companies',
+    fmt:function(v){return '$'+v+'M';}, avg:null,
+    col:'Annual Revenue (millions)',
+    data:{'Alderton Industrial':72,'Cascadia Manufacturing Group':110,'Delverton & Sons':96,'Farwick Corp.':68,'Halloran Systems':91,'Mirex Technologies':78,'Northgate Supplies':104,'Summit Core Group':85,'Westbrook Fabrication':82}
+  },
+  { id:'prior-loss', title:'Prior Year Actual Loss Rate',
+    sub:'Percentage of money owed by customers in the prior year that was never paid',
+    fmt:function(v){return v.toFixed(2)+'%';}, avg:3.23, avgLabel:'Peer Average: 3.23%',
+    col:'Prior Year Actual Loss Rate',
+    data:{'Alderton Industrial':2.80,'Cascadia Manufacturing Group':3.50,'Delverton & Sons':3.90,'Farwick Corp.':2.90,'Halloran Systems':3.30,'Mirex Technologies':2.50,'Northgate Supplies':3.80,'Summit Core Group':3.20,'Westbrook Fabrication':3.10}
+  },
+  { id:'days', title:'Average Days to Collect Payment',
+    sub:'Average number of days it takes customers to pay after a purchase',
+    fmt:function(v){return v+' days';}, avg:39, avgLabel:'Peer Average: 39 days',
+    col:'Avg. Days to Collect Payment',
+    data:{'Alderton Industrial':41,'Cascadia Manufacturing Group':35,'Delverton & Sons':44,'Farwick Corp.':37,'Halloran Systems':40,'Mirex Technologies':33,'Northgate Supplies':43,'Summit Core Group':38,'Westbrook Fabrication':36}
+  },
+  { id:'pastdue', title:'Payments 90+ Days Past Due',
+    sub:'Percentage of money owed by customers that is more than 90 days past the due date',
+    fmt:function(v){return v.toFixed(2)+'%';}, avg:6.46, avgLabel:'Peer Average: 6.46%',
+    col:'% of Payments 90+ Days Past Due',
+    data:{'Alderton Industrial':5.80,'Cascadia Manufacturing Group':7.10,'Delverton & Sons':8.00,'Farwick Corp.':5.50,'Halloran Systems':6.50,'Mirex Technologies':5.10,'Northgate Supplies':7.80,'Summit Core Group':6.20,'Westbrook Fabrication':5.90}
+  }
+];
+
+function renderTable(m) {
+  var h = '<div class="metric-section">'
+    + '<div class="metric-header"><div class="metric-title">'+m.title+'</div></div>'
+    + '<div class="metric-sub">'+m.sub+'</div>'
+    + '<table><thead><tr><th>Company</th><th>'+m.col+'</th></tr></thead><tbody>';
+  for (var i=0; i<ALL_COMPANIES.length; i++) {
+    var c = ALL_COMPANIES[i];
+    h += '<tr class="'+(c===SUMMIT?'summit-row':'')+'"><td>'+c+'</td><td>'+m.fmt(m.data[c])+'</td></tr>';
+  }
+  h += '</tbody></table>';
+  if (m.avg !== null) h += '<div class="tbl-avg"><span>Peer Average</span><span>'+m.avgLabel.replace('Peer Average: ','')+'</span></div>';
+  return h + '</div>';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var html = '';
+  for (var i=0; i<METRICS.length; i++) html += renderTable(METRICS[i]);
+  document.getElementById('content').innerHTML = html;
+});
+</script>
+</body>
+</html>
